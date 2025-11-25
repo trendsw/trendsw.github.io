@@ -2,41 +2,49 @@ name: Publish Node.js app to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
-  
+
 concurrency:
-  group: production
+  group: pages
   cancel-in-progress: true
 
 jobs:
-  build_and_deploy:
+  build:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
       - name: Setup Node
-        uses: actions/setup-node@v4.0.0
-        with: 
-          node-version: "18"
-          cache: '${{ steps.detect-package-manager.outputs.manager }}'
-      - name: Install Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
         run: npm install
+
       - name: Build
         run: npm run build
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v4.0.0
+
+      # NEW REQUIRED STEP — this uploads the artifact in the correct format
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: './dist'
-      - name: Deploy GitHub Pages site
-        uses: actions/deploy-pages@v1.2.9
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
