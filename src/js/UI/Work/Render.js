@@ -69,6 +69,9 @@ export default class WorkRender {
                 </div>
                  ${item.liveview ? `<div id="work-item-orange-button-${item.id}" class="work-item-orange-button small-button center orange-hover">Live View</div>` : ''}
             `
+
+            if (item.github == "/")
+                content = `${item.liveview ? `<div id="work-item-orange-button-${item.id}" class="work-item-orange-button small-button center orange-hover">Live View</div>` : ''}`;
         } else if (item.twitter) {
             content = `
             <div id="work-item-orange-button-${item.id}" class="work-item-orange-button small-button center orange-hover" style="width: 100%; margin: 0;">
@@ -121,9 +124,11 @@ export default class WorkRender {
 
         if (item.github) {
             // Gray button click
-            document.getElementById('work-item-gray-button-' + item.id).addEventListener('click', () => {
-                window.open(item.github, '_blank').focus()
-            })
+            if (item.github != "/") {
+                document.getElementById('work-item-gray-button-' + item.id).addEventListener('click', () => {
+                    window.open(item.github, '_blank').focus()
+                })
+            }
 
             // orange button click
             if (item.liveview) {
